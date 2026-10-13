@@ -1,6 +1,5 @@
 import React from "react";
 import axios from "axios";
-import "./App.css";
 
 /* const welcome = {
   greeting: "Hey",
@@ -258,7 +257,7 @@ const storiesReducer = (state, action) => {
 };
 
 // writing custom hook
-const useStorageState = (key, initialState) => {
+const useStorageState = (key: string, initialState: string) => {
   const [value, setValue] = React.useState(
     localStorage.getItem(key) || initialState,
   );
@@ -266,7 +265,7 @@ const useStorageState = (key, initialState) => {
   React.useEffect(() => {
     localStorage.setItem(key, value);
   }, [key, value]);
-  return [value, setValue];
+  return [value, setValue] as const;
 };
 
 const InputWithLabel = ({
