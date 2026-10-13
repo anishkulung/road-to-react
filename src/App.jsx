@@ -102,22 +102,22 @@ const App = () => {
     } catch {
       dispatchStories({ type: "STORIES_FETCH_FAILURE" });
     }
+    console.log("from fetch stories functions.");
   }, [searchUrl]);
 
   React.useEffect(() => {
     handleFetchStories();
   }, [handleFetchStories]);
 
-  const handleRemoveStory = (story) => {
+  const handleRemoveStory = React.useCallback((story) => {
     dispatchStories({
       type: "REMOVE_STORY",
       payload: story,
     });
-  };
+  }, []);
 
   const handleSearchInput = (newSearchTerm) => {
     setSearchTerm(newSearchTerm);
-
     console.log("Searching:" + newSearchTerm);
   };
 
@@ -136,7 +136,7 @@ const App = () => {
   //   s.title.toLowerCase().includes(searchTerm.toLowerCase()),
   // );
 
-  const handleVote = (id, delta) => {
+  const handleVote = React.useCallback((id, delta) => {
     dispatchStories({
       type: "VOTE_STORY",
       payload: { id, delta },
@@ -149,7 +149,7 @@ const App = () => {
     //       : story,
     //   );
     // });
-  };
+  }, []);
 
   // const handleRemoveStory = (id) => {
   //   setStories((prev) => prev.filter((story) => story.objectID !== id));
@@ -158,9 +158,10 @@ const App = () => {
   console.log("searching:" + searchTerm);
 
   // console.log("App REnders!");
+  console.log("B:App");
   return (
-    <div>
-      <hr />
+    <div className="container">
+      <h1 className="headline-primary">My Hacker Stories</h1>
       {/* <Toggler1 />
       <Toggler2 toggle={toggle} onToggle={handleToggle} /> */}
       {/* <Timer /> */}
@@ -170,12 +171,12 @@ const App = () => {
         <p> Loading...</p>
       ) : (
         <>
-            <SearchForm
-              searchTerm={searchTerm}
-              onSearchInput={handleSearchInput}
-              // onSearchSubmit={handleSearchSubmit}
-              searchAction={searchAction}
-            />
+          <SearchForm
+            searchTerm={searchTerm}
+            onSearchInput={handleSearchInput}
+            // onSearchSubmit={handleSearchSubmit}
+            searchAction={searchAction}
+          />
 
           <StoryList
             storyItems={stories.data}
@@ -188,19 +189,27 @@ const App = () => {
   );
 };
 
-const SearchForm = ({ searchTerm, onSearchInput, searchAction}) => {
+const SearchForm = ({ searchTerm, onSearchInput, searchAction }) => {
   return (
-    <form action={searchAction}>
+    <form action={searchAction} className="search-form">
       <InputWithLabel
         id="searchByTitle"
         isAutoFocus
         value={searchTerm}
         onInputChange={onSearchInput}
-      ></InputWithLabel>
-      <button type="submit" disabled={!searchTerm}>Submit</button>
+      >
+        <strong>Search: </strong>
+      </InputWithLabel>
+      <button
+        type="submit"
+        disabled={!searchTerm}
+        className="button button-large"
+      >
+        Submit
+      </button>
     </form>
-  )
-}
+  );
+};
 
 const storiesReducer = (state, action) => {
   switch (action.type) {
@@ -260,54 +269,65 @@ const useStorageState = (key, initialState) => {
   return [value, setValue];
 };
 
-const InputWithLabel = ({ id, isAutoFocus, value, type = "text", onInputChange }) => {
+const InputWithLabel = ({
+  id,
+  isAutoFocus,
+  value,
+  type = "text",
+  onInputChange,
+  children,
+}) => {
   // const handleChange = (event) => {
   //   console.log("Handling change on Search Function");
   //   onSearch(event.target.value);
   // };
   return (
-    <>
-      <label htmlFor={id}>
-        <strong>Search: </strong>{" "}
-      </label>
+    <div>
+      {children}
+      <label htmlFor={id}></label>
       <input
         id={id}
         autoFocus={isAutoFocus}
         value={value}
         type={type}
         onChange={(event) => onInputChange(event.target.value)}
+        className="input"
       />
+
       <p>
         You are searching: <b>{value}</b>
       </p>
-    </>
+    </div>
   );
 };
 
-const StoryList = ({ storyItems, onVote, onRemove }) => {
-  return (
-    <table
-      style={{
-        borderCollapse: "collapse",
-        margin: "16px 0",
-        fontFamily: "sans-serif",
-      }}
-    >
-      <tbody>
-        {storyItems.map((item) => (
-          <Item
-            key={item.objectID}
-            item={item}
-            onVote={onVote}
-            onRemove={onRemove}
-          />
-        ))}
-      </tbody>
-    </table>
-  );
-};
+const StoryList = React.memo(
+  ({ storyItems, onVote, onRemove }) =>
+    console.log("B:List") || (
+      <table
+        style={{
+          borderCollapse: "collapse",
+          margin: "16px 0",
+          fontFamily: "sans-serif",
+        }}
+      >
+        <tbody>
+          {storyItems.map((item) => (
+            <Item
+              key={item.objectID}
+              item={item}
+              onVote={onVote}
+              onRemove={onRemove}
+              className="button button_small"
+            />
+          ))}
+        </tbody>
+      </table>
+    ),
+);
 
-const Item = ({ item, onVote, onRemove }) => {
+const Item = React.memo(({ item, onVote, onRemove }) => {
+  console.log("B:Item", item.objectID);
   const handlePlusPointClick = () => {
     onVote(item.objectID, +1);
   };
@@ -353,7 +373,7 @@ const Item = ({ item, onVote, onRemove }) => {
     <button onClick={() => props.onSubtract(props.item.objectID)}>-</button>*/}
     </tr>
   );
-};
+});
 
 const Button = ({ btnLabel, onClick }) => (
   <button type="button" onClick={onClick}>
